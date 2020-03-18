@@ -1,8 +1,10 @@
 
 # #
-# size = 1
-# n = 2
-# packages = [(0, 1), (0, 1), (2, 2), (3, 3)]
+# size, n = 1, 2
+# q = '0 1\n0 1'
+
+size, n = 0, 2
+q = '0 1\n0 1'
 
 # size = 2
 # n = 8
@@ -13,44 +15,43 @@
 # n = 3
 # packages = [(1, 100),(1, 100), (1, 0)]
 #
-# size = 3
-# n = 6
-# packages = [(0, 7), (0, 0), (2, 0), (3, 3), (4, 0), (5, 0)]
-'''0 7 7 -1 -1 -1'''
-# size = 2
-# n = 6
-# packages = [(0, 2), (0, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+# size, n = 3, 6
+# q = '0 7\n0 0\n2 0\n3 3\n4 4\n 5 5'
+# '''0 7 7 -1 -1 -1'''
+# size, n = 2, 6
+# q = '0 2\n0 0\n2 0\n3 0\n4 0\n5 0'
 # '''0 2 2 3 4 5'''
 
 # size = 3
 # n = 6
 # packages = [(0, 2), (0, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
 
-#
+
 # size = 1
 # n = 5
-# packages = [(999999, 1), (1000000, 0), (1000000, 1), (1000000, 0), (1000000, 0)]
+# q = '999999 1\n1000000 0\n1000000 1\n1000000 0\n1000000 0'
 
-
-size, n = 2, 8
-q = '''0 0
-0 0
-0 0
-1 0
-1 0
-1 1
-1 2
-1 3'''
+#
+# size, n = 2, 8
+# q = '''0 0
+# 0 0
+# 0 0
+# 1 0
+# 1 0
+# 1 1
+# 1 2
+# 1 3'''
 
 # Ответ: 0 0 0 1 1 1 2 -1
+# size, n = 3, 8
+# q= '1 1\n2 2\n3 3\n4 4\n5 5\n6 6\n7 7\n8 8'
+# 'Ответ: 1 2 4 7 11 -1 16 -1'
 
 
 import sys
-
+#
 # size, n = list(map(lambda x: int(x), input().split(' ')))
-
-
-
+#
 # q = str()
 #
 # for line in sys.stdin:
@@ -59,44 +60,43 @@ import sys
 #     q += line
 
 
-packages = [tuple(int(k) for k in (el.split())) for el in q.split('\n')]
+packages = [tuple(int(k) for k in (el.split())) for el in q.split('\n') if q]
 
-buf = 0
+
+buffer = []
+t_0, t_end = 0, 0
 proc = []
-proc_time = None
 
 for k in packages[:n:]:
 
-    if not proc_time:
-        proc_time = k[1]
-        proc.append(k[0])
-        buf+=1
-        continue
-
-    if k[1] + k[0] > proc_time :
-        proc.append(k[1])
-        proc_time = k[1]
-        buf = 0
-
-    elif k[1] == 0 and buf == size and k[0] == proc_time:
-        proc.append(proc_time)
-        buf -=1
-
-    elif k[1] + k[0] < proc_time and buf < size:
-        proc.append(proc_time)
-        buf += 1
-
-    # elif k[1] + k[0] == proc_time:
-    #     if buf == size:
-    #         proc.append(-1)
-    #     else:
-    #         proc.append(proc_time)
-
+    if not buffer:
+        buffer.append(k[0])
+        t_0 = k[0]
+        t_end = k[0]+k[1]
     else:
-        proc.append(-1)
+        if k[0] == t_0 and len(buffer) < size:
+            t_end += k[1] if t_end > k[0] + k[1] else 0
+            buffer.append(t_end)
+        elif k[0] < t_end and len(buffer) < size:
+            buffer.append(t_end)
+        elif k[0] >= t_end and len(buffer) <= size:
+            go_to_process = buffer[0]
+            while buffer.count(go_to_process) != 0:
+                proc.append(buffer.pop(0))
+
+            t_0 = k[0]
+            buffer.append(t_0)
+            t_end =  k[0] + k[1]
+        else:
+            buffer.append(-1)
+
+while len(buffer) != 0:
+    proc.append(buffer.pop(0))
+
+
+sys.stdout.write(' '.join(list(map(lambda x:str(x), proc))))
 
 
 
-print(*proc)
 
 
